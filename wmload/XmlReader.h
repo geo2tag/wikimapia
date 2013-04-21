@@ -8,6 +8,7 @@
 #define OBJECT_TAG QString("object")
 #define LATITUDE_TAG QString("lat")
 #define LONGITUDE_TAG QString("lon")
+#define PLACE_TAG QString("place")
 
 class XmlReader
 {

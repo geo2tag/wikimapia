@@ -44,7 +44,7 @@ QList<XmlObject> XmlReader::parseObjects(double lonmin, double lonmax, double la
 
         if(token == QXmlStreamReader::Characters) {
         //    qDebug() << "Characters: " << xml.text();
-            if (lastName == OBJECT_TAG){
+            if (lastName == PLACE_TAG){
                 data = xml.text().toString();
             }else if (lastName == LATITUDE_TAG){
                 latitude = xml.text().toString().toDouble();
