@@ -15,12 +15,12 @@ class XmlReader
 	QString m_fileName;	
     int m_cuttedNumber;
 
-    bool isTooBig(const XmlObject& obj);
 
 public:
 	XmlReader(const QString& fileName);
 
     QList<XmlObject> parseObjects(double lonmin, double lonmax, double latmin, double latmax);
+    XmlObject parseObject(const QString& document );
 
     int getCuttedNumber() const ;
 

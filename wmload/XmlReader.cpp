@@ -1,25 +1,75 @@
 #include "XmlReader.h"
 #include <QFile>
 #include <QDebug>
+#include <QTextStream>
+#include <QRegExp>
+#include <QObject>
 
+#define XML_SUBFILE_START "<?xml version=\"1.0\" encoding=\"utf-8\"?>"
+#define DATA_MAX_SIZE 2048
 
 XmlReader::XmlReader(const QString& fileName):
     m_fileName(fileName),m_cuttedNumber(0)
 {
-
 }
 
 QList<XmlObject> XmlReader::parseObjects(double lonmin, double lonmax, double latmin, double latmax)
 {
-    QFile* file = new QFile(m_fileName);
 
-    if (!file->open(QIODevice::ReadOnly | QIODevice::Text)) {
-        qDebug() << "Error opening " << m_fileName ;
-        exit(1);
-    }
+	QList<XmlObject> objects;
+	QFile file(m_fileName);
 
-    QXmlStreamReader xml(file);
-    QList< XmlObject > objects;
+	if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+		qDebug() << "Error opening " << m_fileName ;
+		exit(1);
+	}
+	QTextStream in(&file);
+	QString buffer;
+
+	QRegExp regExp("<object version=\"1.0\">(.*)</object>");
+
+	while(!in.atEnd()) {
+		QString line = in.readLine();    
+		if (!buffer.isEmpty() && ( line == XML_SUBFILE_START || in.atEnd() ) ){
+			
+			if (in.atEnd())
+			{
+				buffer.append(line);
+			}
+
+			XmlObject obj = parseObject(buffer);
+			QString data;
+			int pos = regExp.indexIn(buffer);
+			if (pos > -1) {
+				data = regExp.cap(1); 
+//				qDebug() << "Data found!!!!!" << data;
+			}
+
+
+			if (data.size() > DATA_MAX_SIZE)
+			    m_cuttedNumber++;
+			else if (obj.getLatitude() <= latmax && obj.getLatitude() >= latmin &&
+				 obj.getLongitude() <= lonmax && obj.getLongitude() >= lonmin )
+			{
+				obj.setData(data);
+				objects.push_back(obj);
+			}
+			
+			buffer = "";	
+		}
+		buffer.append(line);
+	
+	}
+
+	return objects;
+
+}
+
+XmlObject XmlReader::parseObject(const QString& document)
+{
+
+    QXmlStreamReader xml(document);
+    XmlObject object;
 
 
     QString lastName ;
@@ -31,22 +81,13 @@ QList<XmlObject> XmlReader::parseObjects(double lonmin, double lonmax, double la
           !xml.hasError()) {
         QXmlStreamReader::TokenType token = xml.readNext();
 
-   //     if(token == QXmlStreamReader::StartDocument) {
-  //          continue;
-   //     }
-
-
         if(token == QXmlStreamReader::StartElement) {
-
-          //  qDebug() << "StartElement" << xml.name();
             lastName = xml.name().toString();
         }
 
         if(token == QXmlStreamReader::Characters) {
         //    qDebug() << "Characters: " << xml.text();
-            if (lastName == PLACE_TAG){
-                data = xml.text().toString();
-            }else if (lastName == LATITUDE_TAG){
+            if (lastName == LATITUDE_TAG){
                 latitude = xml.text().toString().toDouble();
             }else if (lastName == LONGITUDE_TAG){
                 longitude = xml.text().toString().toDouble();
@@ -56,32 +97,21 @@ QList<XmlObject> XmlReader::parseObjects(double lonmin, double lonmax, double la
 
         if(token == QXmlStreamReader::EndElement) {
             if (xml.name().toString() == OBJECT_TAG){
-                qDebug() << "End element" << xml.name();
-                XmlObject obj(latitude, longitude, data);
-                if (isTooBig(obj))
-                    m_cuttedNumber++;
-                else if (latitude <= latmax && latitude >= latmin &&
-                         longitude <= lonmax && longitude >= lonmin )
-                    objects.push_back(obj);
+  //              qDebug() << "End element" << xml.name();
+                object.setLatitude(latitude);
+		object.setLongitude(longitude);
 
             }
 
         }
-
 
     }
 
     if(xml.hasError()) {
         qDebug() << "Error during XML parsing";
     }
+	return object;
 
-
-    return objects;
-}
-
-bool XmlReader::isTooBig(const XmlObject& obj)
-{
-    return false;
 }
 
 

@@ -60,9 +60,9 @@ void DbFiller::addTag(const XmlObject& tag){
                         "         values(:altitude, :latitude, :longitude, :label, :description, :url, :user_id, :channel_id);");
 
     addTagQuery.bindValue(":altitude", 0.0);
-    addTagQuery.bindValue(":latitude", tag.m_latitude);
-    addTagQuery.bindValue(":longitude", tag.m_longitude);
-    addTagQuery.bindValue(":description", tag.m_data.isEmpty() ? "data is empty": tag.m_data);
+    addTagQuery.bindValue(":latitude", tag.getLatitude());
+    addTagQuery.bindValue(":longitude", tag.getLongitude());
+    addTagQuery.bindValue(":description", tag.getData().isEmpty() ? "data is empty": tag.getData());
     addTagQuery.bindValue(":label", "added by wmloader");
     addTagQuery.bindValue(":url", "http://wikimapia.org/");
 
@@ -73,14 +73,14 @@ void DbFiller::addTag(const XmlObject& tag){
 
 
     bool result = addTagQuery.exec();
-    qDebug() << addTagQuery.executedQuery();
+//    qDebug() << addTagQuery.executedQuery();
     if(!result)
     {
         QSqlDatabase::database().rollback();
         return ;
     }
 
-    qDebug() << "tag added successfuly";
+  //  qDebug() << "tag added successfuly";
     QSqlDatabase::database().commit();
 
 

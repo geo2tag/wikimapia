@@ -18,4 +18,5 @@ LIBS += -lpq
 HEADERS += DbFiller.h XmlObject.h XmlReader.h
 SOURCES += main.cpp \
     XmlReader.cpp \
+    XmlObject.cpp \
     DbFiller.cpp
