@@ -5,8 +5,6 @@
 #include <QRegExp>
 #include <QObject>
 
-#define XML_SUBFILE_START "<?xml version=\"1.0\" encoding=\"utf-8\"?>"
-#define DATA_MAX_SIZE 2048
 
 XmlReader::XmlReader(const QString& fileName):
     m_fileName(fileName),m_cuttedNumber(0)
