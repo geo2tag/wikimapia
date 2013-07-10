@@ -28,34 +28,31 @@ QList<XmlObject> XmlReader::parseObjects(double lonmin, double lonmax, double la
 
 	while(!in.atEnd()) {
 		QString line = in.readLine();    
-		if (!buffer.isEmpty() && ( line == XML_SUBFILE_START || in.atEnd() ) ){
-			
-			if (in.atEnd())
-			{
-				buffer.append(line);
-			}
+		if (line.isEmpty()) continue;
+		qDebug() << line << "|||";
 
+		buffer.append(line);
+
+		qDebug() << "++++" << buffer << "++++";			
+
+		QString data;
+		int pos = regExp.indexIn(buffer);
+		if (pos > -1) {
+			data = regExp.cap(1); 
 			XmlObject obj = parseObject(buffer);
-			QString data;
-			int pos = regExp.indexIn(buffer);
-			if (pos > -1) {
-				data = regExp.cap(1); 
-//				qDebug() << "Data found!!!!!" << data;
-			}
-
-
+			qDebug() << "Data found!!!!! " << data << "\\\\";
 			if (data.size() > DATA_MAX_SIZE)
-			    m_cuttedNumber++;
+				m_cuttedNumber++;
 			else if (obj.getLatitude() <= latmax && obj.getLatitude() >= latmin &&
 				 obj.getLongitude() <= lonmax && obj.getLongitude() >= lonmin )
 			{
+				qDebug() << "found appropriate object!";
 				obj.setData(data);
 				objects.push_back(obj);
 			}
-			
 			buffer = "";	
 		}
-		buffer.append(line);
+			
 	
 	}
 
@@ -78,7 +75,6 @@ XmlObject XmlReader::parseObject(const QString& document)
     while(!xml.atEnd() &&
           !xml.hasError()) {
         QXmlStreamReader::TokenType token = xml.readNext();
-
         if(token == QXmlStreamReader::StartElement) {
             lastName = xml.name().toString();
         }

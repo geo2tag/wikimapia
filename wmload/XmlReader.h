@@ -10,7 +10,7 @@
 #define LONGITUDE_TAG QString("lon")
 #define PLACE_TAG QString("place")
 #define XML_SUBFILE_START QString("<?xml version=\"1.0\" encoding=\"utf-8\"?>")
-#define DATA_MAX_SIZE 2048
+#define DATA_MAX_SIZE 600048
 
 class XmlReader
 {
