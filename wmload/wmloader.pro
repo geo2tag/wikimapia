@@ -7,6 +7,9 @@ TARGET = wmloader
 DEPENDPATH += .
 INCLUDEPATH += .
 
+OBJECTS_DIR = .obj
+MOC_DIR = .moc
+
 CONFIG += debug
 
 QT -= gui

@@ -7,7 +7,7 @@ int main(int argc, char** argv)
 {
     QCoreApplication app(argc,argv);
 
-	if (argc != 8){
+	if (argc != 8 ){
 		qDebug() << "Not enaugh parameters.\n"
 		"Usage: ./wmloader datafile dbname channel lonmin lonmax latmin latmax\n";
 		return 0;
@@ -23,16 +23,21 @@ int main(int argc, char** argv)
 
 	XmlReader reader(datafile);
 
+	QString substring;
+
+	if (argc == 9)
+		substring = argv[8];
+
 	QList<XmlObject> objects = reader.parseObjects(lonmin, lonmax, latmin, latmax);
-    qDebug() << "Not included because of too much size - " << reader.getCuttedNumber();
-    qDebug() << "Parsed" << objects.size();
+	qDebug() << "Not included because of too much size - " << reader.getCuttedNumber();
+	qDebug() << "Parsed" << objects.size();
 
 
 
-    DbFiller filler(dbname, channel);
+	DbFiller filler(dbname, channel);
 
-    filler.fillDb(objects);
+    	filler.fillDb(objects);
 	
 
-    return 0;//app.exec();
+   	return 0;//app.exec();
 }

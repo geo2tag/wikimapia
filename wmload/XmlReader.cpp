@@ -11,7 +11,8 @@ XmlReader::XmlReader(const QString& fileName):
 {
 }
 
-QList<XmlObject> XmlReader::parseObjects(double lonmin, double lonmax, double latmin, double latmax)
+QList<XmlObject> XmlReader::parseObjects(double lonmin, double lonmax, 
+	double latmin, double latmax)
 {
 
 	QList<XmlObject> objects;
@@ -28,26 +29,25 @@ QList<XmlObject> XmlReader::parseObjects(double lonmin, double lonmax, double la
 
 	while(!in.atEnd()) {
 		QString line = in.readLine();    
-		if (line.isEmpty()) continue;
-		qDebug() << line << "|||";
+		if (line.isEmpty()) 
+			continue;
 
 		buffer.append(line);
-
-		qDebug() << "++++" << buffer << "++++";			
 
 		QString data;
 		int pos = regExp.indexIn(buffer);
 		if (pos > -1) {
 			data = regExp.cap(1); 
-			XmlObject obj = parseObject(buffer);
-			qDebug() << "Data found!!!!! " << data << "\\\\";
-			if (data.size() > DATA_MAX_SIZE)
+			XmlObject obj(buffer);
+			if (!obj.isValid())
+			{
 				m_cuttedNumber++;
+				qDebug() << "Not included " << m_fileName << obj.getId() ;
+			}
 			else if (obj.getLatitude() <= latmax && obj.getLatitude() >= latmin &&
 				 obj.getLongitude() <= lonmax && obj.getLongitude() >= lonmin )
 			{
-				qDebug() << "found appropriate object!";
-				obj.setData(data);
+				qDebug() << "found appropriate object, " << m_fileName << obj.getId();
 				objects.push_back(obj);
 			}
 			buffer = "";	
@@ -60,53 +60,6 @@ QList<XmlObject> XmlReader::parseObjects(double lonmin, double lonmax, double la
 
 }
 
-XmlObject XmlReader::parseObject(const QString& document)
-{
-
-    QXmlStreamReader xml(document);
-    XmlObject object;
-
-
-    QString lastName ;
-    QString data;
-    double latitude;
-    double longitude;
-
-    while(!xml.atEnd() &&
-          !xml.hasError()) {
-        QXmlStreamReader::TokenType token = xml.readNext();
-        if(token == QXmlStreamReader::StartElement) {
-            lastName = xml.name().toString();
-        }
-
-        if(token == QXmlStreamReader::Characters) {
-        //    qDebug() << "Characters: " << xml.text();
-            if (lastName == LATITUDE_TAG){
-                latitude = xml.text().toString().toDouble();
-            }else if (lastName == LONGITUDE_TAG){
-                longitude = xml.text().toString().toDouble();
-            }
-
-        }
-
-        if(token == QXmlStreamReader::EndElement) {
-            if (xml.name().toString() == OBJECT_TAG){
-  //              qDebug() << "End element" << xml.name();
-                object.setLatitude(latitude);
-		object.setLongitude(longitude);
-
-            }
-
-        }
-
-    }
-
-    if(xml.hasError()) {
-        qDebug() << "Error during XML parsing";
-    }
-	return object;
-
-}
 
 
 int XmlReader::getCuttedNumber() const
